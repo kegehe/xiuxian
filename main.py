@@ -25,6 +25,7 @@ def fight(obj1: Character, obj2: Enemy):
         obj1.die()
     obj1.get_status()
 
+
 character = Character('java')
 enemy = Enemy()
 fight(character, enemy)
