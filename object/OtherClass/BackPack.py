@@ -1,4 +1,4 @@
 class BackPack:
-    __capacity = 10
+    capacity = 10
 
     now_contains = []

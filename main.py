@@ -1,9 +1,9 @@
 import pickle
 import time
 
-from object.Character import Character
+from object.PersonClass.Character import Character
 
-from object.Enemy import Enemy
+from object.PersonClass.Enemy import Enemy
 
 
 def get_data():
@@ -12,11 +12,10 @@ def get_data():
     return obj
 
 
-# 战斗
 def fight(obj1: Character, obj2: Enemy):
-    while obj1.HP > 0 and obj2.HP > 0:
-        obj1.HP -= obj2.atk
-        obj2.HP -= obj1.atk
+    while obj1.now_HP > 0 and obj2.HP > 0:
+        obj1.now_HP -= obj2.atk
+        obj2.now_HP -= obj1.atk
         time.sleep(1)
     if obj2.HP < 0:
         m = obj2.die()
@@ -24,6 +23,14 @@ def fight(obj1: Character, obj2: Enemy):
     else:
         obj1.die()
     obj1.get_status()
+
+
+def explore():
+    pass
+
+
+def trade():
+    pass
 
 
 character = Character('java')
