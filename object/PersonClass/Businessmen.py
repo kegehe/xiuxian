@@ -20,18 +20,20 @@ class Businessmen:
                 '3': {'id': 3, 'thing': 1, 'num': 20},
             }
 
-    def sell_item(self, index):
-        sell_good = self.goods[index]
+    # 商人卖出东西，金钱增加，按物品的买入价格卖出
+    def sell_item(self, item):
+        sell_good = self.goods[item]
         self.money += sell_good['thing'].sell_price
         sell_good['num'] -= 1
+        return item
 
+    # 商人收购东西，金钱减少，按物品的卖出价格买入
     def buy_item(self, index):
         if index not in self.goods:
             self.goods[index] = 1
         else:
             self.goods[index]['num'] += 1
 
-
-b = Businessmen()
-b.sell_item('1')
-print(b.money)
+    # 商人死亡，爆出大部分物品，人物减少声望
+    def die(self):
+        pass

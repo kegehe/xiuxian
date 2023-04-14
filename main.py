@@ -1,38 +1,25 @@
-import pickle
-import time
+import sys
 
-from object.PersonClass.Character import Character
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
 
-from object.PersonClass.Enemy import Enemy
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
 
+    w = QWidget()
 
-def get_data():
-    with open("./static/character.pickle", "rb") as f:
-        obj = pickle.load(f)
-    return obj
+    # 设置窗口标题
+    w.setWindowTitle("第一个PyQt程序")
 
+    w.resize(200, 200)
 
-def fight(obj1: Character, obj2: Enemy):
-    while obj1.now_HP > 0 and obj2.HP > 0:
-        obj1.now_HP -= obj2.atk
-        obj2.now_HP -= obj1.atk
-        time.sleep(1)
-    if obj2.HP < 0:
-        m = obj2.die()
-        obj1.back_pack.append(m)
-    else:
-        obj1.die()
-    obj1.get_status()
+    # 在窗口里面添加控件
+    btn = QPushButton("按钮")
 
+    # 设置按钮的父亲是当前窗口，等于是添加到窗口中显示
+    btn.setParent(w)
 
-def explore():
-    pass
+    # 展示窗口
+    w.show()
 
-
-def trade():
-    pass
-
-
-character = Character('java')
-enemy = Enemy()
-fight(character, enemy)
+    # 程序进行循环等待状态
+    app.exec()
