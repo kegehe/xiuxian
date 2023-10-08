@@ -5,17 +5,31 @@ from PySide6.QtWidgets import (
     QLabel,
     QApplication,
     QSystemTrayIcon,
-    QMenu)
+    QMenu, QSizePolicy, QPushButton)
 from PySide6.QtGui import QPixmap, QIcon, QAction
-from PySide6.QtCore import QTimer, Qt, QPoint
+from PySide6.QtCore import QTimer, Qt, QPoint, QPropertyAnimation, QEasingCurve, \
+    QParallelAnimationGroup
+
+from object.PersonClass.Character import Character
 
 app = QApplication()
 
 
 class MyWindow(QWidget):
+
     def __init__(self):
         super().__init__()
-        # 定义宠物的默认大小和位置
+        self.animate = None
+        self.animation = None
+        self.character = Character('kegehe')
+
+        # self.setStyleSheet("""
+        #     QWidget{
+        #         border:1px solid black;
+        #     }
+        # """)
+
+        # 定义窗体默认大小和位置
         self.mouse_pos = None
         self.setGeometry(1000, 500, 200, 200)
         # 设置窗口标志为置顶显示
@@ -24,7 +38,7 @@ class MyWindow(QWidget):
 
         # 设置后台托盘
         self.tray_icon = QSystemTrayIcon(self)
-        self.tray_icon.setIcon(QIcon("static/meditation.png"))  # 使用自己的图标
+        self.tray_icon.setIcon(QIcon("static/meditation.png"))  # 使用图标
         self.tray_icon.show()
 
         # 设置托盘菜单
@@ -52,7 +66,7 @@ class MyWindow(QWidget):
                 background-color: #007bff;  
                 color: white;  
             }
-        """)
+        """)  # 设置托盘菜单样式
 
         self.tray_icon.setContextMenu(self.menu)
 
@@ -63,24 +77,79 @@ class MyWindow(QWidget):
         self.stand_img = self.stand_img.scaled(120, 120, Qt.KeepAspectRatio)
 
         # 创建显示控件
+        self.name_text = QLabel(self)
+        self.name_text.setGeometry(0, 0, 50, 20)
+        self.name_text.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.name_text.setText(f'名称：{self.character.name}')
+
+        self.lv_text = QLabel(self)
+        self.lv_text.setGeometry(0, 20, 50, 20)
+        self.lv_text.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.lv_text.setText(f'lv: {self.character.lv}')
+
+        self.cultivation_text = QLabel(self)
+        self.cultivation_text.setGeometry(0, 40, 50, 20)
+        self.cultivation_text.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.cultivation_text.setText(f'总: {self.character.cultivation}')
+
         self.pet_label = QLabel(self)
         self.pet_label.setPixmap(self.meditation_img)
         # self.pet_label.setAttribute(Qt.WA_TranslucentBackground)  # 将 QWidget 的背景设置为半透明
         self.pet_label.show()
-        self.increase_text = QLabel(self)
-        self.increase_text.setGeometry(30, 0, 20, 15)
-        self.increase_text.setText('hello')
-        self.increase_text.show()
 
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update_text)
+        self.increase_text = QLabel(self)
+        self.increase_text.setGeometry(60, 0, 20, 15)
+        self.increase_text.setAlignment(Qt.AlignCenter)
+        self.increase_text.setStyleSheet("""
+            QLabel{
+                color: green;
+            }
+        """)
+
+        self.breakthrough_button = QPushButton(self)
+        self.breakthrough_button.setText('突破')
+        self.breakthrough_button.setGeometry(55, 60, 30, 20)
+        self.breakthrough_button.hide()
+        self.breakthrough_button.clicked.connect(self.breakthrough)
+
+        self.meditate_timer = QTimer(self)
+        self.meditate_timer.timeout.connect(self.increase_meditate)
+
+        self.text_move_timer = QTimer(self)
+        self.text_move_timer.timeout.connect(self.update_text)
+
+    def breakthrough(self):
+        self.character.breakthrough()
+
+    def increase_meditate(self):
+        increase = self.character.meditate()
+        # if self.character.cultivation >= 10000:
+        #     increase_text = f'{self.character.cultivation / 10000}万'
+        # elif self.character.cultivation >= 1000:
+        #     increase_text = f'{self.character.cultivation / 1000}千'
+        # elif self.character.cultivation >= 100:
+        #     increase_text = f'{self.character.cultivation / 100}百'
+        # elif self.character.cultivation >= 10:
+        #     increase_text = f'{self.character.cultivation / 10}十'
+        self.cultivation_text.setText(f'总: {self.character.cultivation}')
+
+        self.increase_text.show()
+        self.increase_text.setText(str(increase))
+
+        self.animate = QPropertyAnimation(self.increase_text, b'pos')
+        self.animate.setStartValue(QPoint(50, 100))
+        self.animate.setEndValue(QPoint(50, 0))
+        self.animate.setDuration(2000)
+        self.animate.setEasingCurve(QEasingCurve.InOutQuad)
+        self.animation = QParallelAnimationGroup()
+        self.animation.addAnimation(self.animate)
+        self.animation.finished.connect(lambda: self.increase_text.hide())
+        self.animation.start()
 
     def update_text(self) -> None:
         x, y = self.increase_text.pos().x(), self.increase_text.pos().y()
         if y < 10:
             self.increase_text.move(x, y + 20)
-            increase = str(int(random.uniform(0.7, 1.3) * 20))
-            self.increase_text.setText(increase)
         else:
             self.increase_text.move(x, y - 1)
 
@@ -96,8 +165,8 @@ class MyWindow(QWidget):
             # 记录点击位置，用于移动
             self.mouse_pos = event.globalPosition().toPoint() - self.pos()
             # 图片互动
-            if not self.timer.isActive():
-                self.timer.start(1000 // 10)  # 每秒30帧
+            if not self.meditate_timer.isActive():
+                self.meditate_timer.start(5000)  # 5秒增加一次
         if event.button() == Qt.RightButton:
             # 退出
             ...

@@ -45,3 +45,9 @@ ENEMY_LIST = {
     '2': {'name': '', 'description': 1, 'equipment_type': 1, 'buy_price': 1,
           'sell_price': 1},
 }
+
+LV = {
+    'lv1': {'max': 120, 'efficiency': 10, 'success_rate': 1.0},
+    'lv2': {'max': 600, 'efficiency': 20, 'success_rate': 0.9},
+    'lv3': {'max': 3000, 'efficiency': 50, 'success_rate': 0.1},
+}
